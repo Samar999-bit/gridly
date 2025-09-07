@@ -3,7 +3,7 @@ numpy
 pandas 
 matplotlib
 seaborn
-tensorflow
+tensorflow-cpu
 scikit-learn
 keras
 fastapi 
@@ -13,3 +13,4 @@ gunicorn
 flask-cors
 requests
 joblib
+
