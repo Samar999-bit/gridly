@@ -12,16 +12,16 @@ from tensorflow.keras.models import load_model
 # 1️⃣ Initialize Flask
 # -----------------------------
 app = Flask(__name__)
-CORS(app)  # Allow frontend requests from any domain
+CORS(app)
 
 # -----------------------------
 # 2️⃣ File paths (relative)
 # -----------------------------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_FILE = os.path.join(BASE_DIR, "D:/forecasting/lstm_weather_model.h5")
-SCALER_X_FILE = os.path.join(BASE_DIR, "D:/forecasting/scaler_X.pkl")
-SCALER_Y_FILE = os.path.join(BASE_DIR, "D:/forecasting/scaler_y.pkl")
-X_SCALED_FILE = os.path.join(BASE_DIR, "D:/forecasting/X_scaled.pkl")
+MODEL_FILE = os.path.join(BASE_DIR, "lstm_weather_model.h5")
+SCALER_X_FILE = os.path.join(BASE_DIR, "scaler_X.pkl")
+SCALER_Y_FILE = os.path.join(BASE_DIR, "scaler_y.pkl")
+X_SCALED_FILE = os.path.join(BASE_DIR, "X_scaled.pkl")
 
 # -----------------------------
 # 3️⃣ Load model & scalers
@@ -35,7 +35,7 @@ scaler_X = joblib.load(SCALER_X_FILE)
 scaler_y = joblib.load(SCALER_Y_FILE)
 X_scaled = joblib.load(X_SCALED_FILE)
 
-SEQ_LEN = 7  # LSTM sequence length
+SEQ_LEN = 7
 
 # -----------------------------
 # 4️⃣ Flask routes
@@ -52,9 +52,6 @@ def predict_energy():
         if not API_KEY:
             return jsonify({"error": "OpenWeatherMap API key not set in environment variables."})
 
-        # -----------------------------
-        # Fetch weather forecast for tomorrow
-        # -----------------------------
         url = f"http://api.openweathermap.org/data/2.5/forecast?q={city}&appid={API_KEY}&units=metric"
         response = requests.get(url).json()
         if "list" not in response:
@@ -75,17 +72,13 @@ def predict_energy():
         if not temps:
             return jsonify({"error": "No forecast available for tomorrow."})
 
-        # Aggregate features
         tomorrow_features = [
-            float(np.mean(temps)),      # temperature
-            float(np.mean(hums)),       # humidity
-            float(np.mean(winds)),      # wind speed
-            float(np.sum(precs))        # precipitation
+            float(np.mean(temps)),
+            float(np.mean(hums)),
+            float(np.mean(winds)),
+            float(np.sum(precs))
         ]
 
-        # -----------------------------
-        # Handle missing features
-        # -----------------------------
         expected_features = X_scaled.shape[1]
         if len(tomorrow_features) < expected_features:
             tomorrow_features += [0] * (expected_features - len(tomorrow_features))
@@ -93,18 +86,12 @@ def predict_energy():
             tomorrow_features = tomorrow_features[:expected_features]
 
         tomorrow_features = np.array([tomorrow_features])
-
-        # -----------------------------
-        # Scale & prepare LSTM input
-        # -----------------------------
         X_tomorrow_scaled = scaler_X.transform(tomorrow_features)
+
         recent_days = X_scaled[-(SEQ_LEN-1):]
         seq_input = np.vstack([recent_days, X_tomorrow_scaled])
         seq_input = seq_input.reshape(1, SEQ_LEN, X_scaled.shape[1])
 
-        # -----------------------------
-        # Predict energy
-        # -----------------------------
         pred_scaled = model.predict(seq_input)
         pred_kWh = scaler_y.inverse_transform(pred_scaled)[0, 0]
 
@@ -116,9 +103,9 @@ def predict_energy():
     except Exception as e:
         return jsonify({"error": f"Prediction failed: {str(e)}"})
 
+
 # -----------------------------
-# 5️⃣ Run Flask (production ready)
+# 5️⃣ Run Flask
 # -----------------------------
 if __name__ == "__main__":
-    # debug=False for production
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 7000)), debug=False)
