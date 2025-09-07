@@ -18,10 +18,10 @@ CORS(app)  # Allow frontend requests from any domain
 # 2️⃣ File paths (relative)
 # -----------------------------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_FILE = os.path.join(BASE_DIR, "D:/forecasting/lstm_weather_model_new.h5")
-SCALER_X_FILE = os.path.join(BASE_DIR, "D:/forecasting/scaler_X_new.pkl")
-SCALER_Y_FILE = os.path.join(BASE_DIR, "D:/forecasting/scaler_y_new.pkl")
-X_SCALED_FILE = os.path.join(BASE_DIR, "D:/forecasting/X_scaled_recent_new.pkl")
+MODEL_FILE = os.path.join(BASE_DIR, "D:/forecasting/lstm_weather_model.h5")
+SCALER_X_FILE = os.path.join(BASE_DIR, "D:/forecasting/scaler_X.pkl")
+SCALER_Y_FILE = os.path.join(BASE_DIR, "D:/forecasting/scaler_y.pkl")
+X_SCALED_FILE = os.path.join(BASE_DIR, "D:/forecasting/X_scaled.pkl")
 
 # -----------------------------
 # 3️⃣ Load model & scalers
