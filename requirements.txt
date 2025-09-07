@@ -11,3 +11,5 @@ uvicorn
 flask
 gunicorn
 flask-cors
+requests
+joblib
