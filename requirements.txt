@@ -10,3 +10,4 @@ fastapi
 uvicorn
 flask
 gunicorn
+flask-cors
